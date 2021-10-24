@@ -9,7 +9,7 @@ namespace Disney.WebAPI.Infrastructure.Email
         {
             RestClient client = new RestClient();
             client.BaseUrl = new Uri("https://api.mailgun.net/v3");
-            client.Authenticator = new HttpBasicAuthenticator("api", "3c8b73e26cdb89403881ccdce752ee08-2ac825a1-55a682fa");
+            client.Authenticator = new HttpBasicAuthenticator("api", "private");
             RestRequest request = new RestRequest();
             request.AddParameter("domain", "sandboxc69c1adeee23448fbf6514358ac480f5.mailgun.org", ParameterType.UrlSegment);
             request.Resource = "{domain}/messages";
