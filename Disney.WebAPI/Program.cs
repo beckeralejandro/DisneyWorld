@@ -161,16 +161,6 @@ app.MapPost("/auth/login", async (UserManager <IdentityUser> userManager, SignIn
 #endregion
 
 #region Personajes
-//app.MapGet("/characters", async ([FromServices] IPersonajeRepository personajeRepository) =>
-//{
-//    var personajes = await personajeRepository.GetAll();
-//    return Results.Ok(personajes.Select(x => new
-//    {
-//        x.Imagen,
-//        x.Nombre
-//    }));
-//});
-
 app.MapGet("/characters", async (IPersonajeRepository personajeRepository, string? name, int? age, string? movies) =>
 {
     var personajes = await personajeRepository.GetFiltered(name, age, movies);
@@ -303,7 +293,7 @@ app.MapDelete("/character/{id}", async (IPersonajeRepository personajeRepository
     return Results.Ok();
 }).RequireAuthorization();
 
-app.MapGet("/character{id}", (IPersonajeRepository personajeRepository, int id) =>
+app.MapGet("/character/{id}", (IPersonajeRepository personajeRepository, int id) =>
 {
     var personaje = personajeRepository.GetDetailById(id);
 
@@ -336,19 +326,11 @@ app.MapGet("/character{id}", (IPersonajeRepository personajeRepository, int id) 
 #endregion
 
 #region Peliculas
-//app.MapGet("/movies", async ([FromServices] IPeliculaRepository peliculaRepository) =>
-//{
-//    var peliculas = await peliculaRepository.GetAll();
-//    return Results.Ok(peliculas.Select(x => new
-//    {
-//        x.Imagen,
-//        x.Titulo,
-//        x.FechaCreacion
-//    }));
-//});
-
-app.MapGet("/movies", async (IPeliculaRepository peliculaRepository, string? name, int? genre, string order) =>
+app.MapGet("/movies", async (IPeliculaRepository peliculaRepository, string? name, int? genre, string? order) =>
 {
+    if (order != "ASC" && order != "DESC")
+        return Results.BadRequest("Falta el orden");
+
     var peliculas = await peliculaRepository.GetFiltered(name, genre, order);
     return Results.Ok(peliculas.Select(x => new
     {
@@ -356,6 +338,31 @@ app.MapGet("/movies", async (IPeliculaRepository peliculaRepository, string? nam
         x.Titulo,
         x.FechaCreacion
     }));
+}).RequireAuthorization();
+
+app.MapGet("/movie/{id}", (IPeliculaRepository peliculaRepository, int id) =>
+{
+    var pelicula = peliculaRepository.GetDetailById(id);
+
+    if (pelicula == null)
+        return Results.BadRequest("Pelicula no existe");
+
+    return Results.Ok(
+        new
+        {
+            pelicula.Imagen,
+            pelicula.FechaCreacion,
+            pelicula.Titulo,
+            pelicula.Clasificacion,
+            Personajes = pelicula.Personajes.Select(x => new
+            {
+                x.Imagen,
+                x.Peso,
+                x.Edad,
+                x.Nombre,
+                x.Historia
+            }).ToList()
+        });
 }).RequireAuthorization();
 
 app.MapPost("/movie", async (IPeliculaRepository peliculaRepository, IValidator<Pelicula> PeliculaValidator, HttpRequest req) =>

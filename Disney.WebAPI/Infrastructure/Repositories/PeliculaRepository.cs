@@ -32,6 +32,11 @@ namespace Disney.WebAPI.Infrastructure.Repositories
             return await result.ToListAsync();
         }
 
+        public Pelicula? GetDetailById(int id)
+        {
+            return db.Pelicula.Where(x => x.Id == id).Include(x => x.Personajes).FirstOrDefault();
+        }
+
         public async Task Add(Pelicula pelicula)
         {
             db.Pelicula.Add(pelicula);
